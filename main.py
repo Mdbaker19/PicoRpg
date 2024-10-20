@@ -331,41 +331,42 @@ def is_point_in_range(tower, target):
 # need bullet ba for projectile here
 def test_tower_sets(towers, enemies, objects):
     ammo_ba = bytearray(objects['tower_ammo'])
-    curr_tower_shoot_time = ticks_ms()
-        
-    for i in range(10):
+    towerW = 14
+    towerH = 19
+
+    for i in range(70):
         # establish tower targets and shoot at them
+        curr_time = ticks_ms()
         for tower in towers:
-            d2.draw_sprite(tower.ba, tower.x, tower.y, 14, 19)
-            tower_shoot_time = ticks_ms()
-            if ticks_diff(tower_shoot_time, curr_tower_shoot_time) >= tower.shoot_time:
-                tower_shoot_time = curr_tower_shoot_time
+            d2.draw_bitmap_array_raw(tower.ba, tower.x, tower.y, towerW, towerH)
+            if ticks_diff(curr_time, tower.last_shoot_time) >= tower.shoot_time:
+                tower.last_shoot_time = curr_time
                 for enemy in enemies:
-                    d2.draw_sprite(enemy.ba, enemy.x, enemy.y, enemy.size, enemy.size)
                     if is_point_in_range(tower, enemy):
-                        print(f"tower at {tower.x} / {tower.y} has a target at {enemy.x} / {enemy.y}")
+                        #print(f"tower at {tower.x} / {tower.y} has a target at {enemy.x} / {enemy.y}")
                         tower.update_attr('target', enemy.ide, True)
-                        tower.projectiles.append(Projectile(tower.x, tower.y, random.randint(-9999, 9999), 2, 2, ba=ammo_ba, path=util.get_slope_path(tower, enemy)))
-            
+                        tower.projectiles.append(Projectile(tower.x + towerW/2, tower.y + towerH/2, random.randint(-9999, 9999), 2, 2, ba=ammo_ba, path=util.get_direction_vector(tower, enemy), speed=1.8)) # will be tower shoot speed later
+
             # handle projectile movement
             e = [e for e in enemies if e.ide == tower.target]
-            projectiles = [p for p in tower.projectiles if p.x <= 130]
-            tower.update_attr('projectiles', projectiles) # not sure if needed
-            for projectile in projectiles:
+            tower.projectiles = [p for p in tower.projectiles if util.is_on_screen(p)]
+            for projectile in tower.projectiles:
                 (x_path, y_path) = projectile.path
-                print(x_path, y_path) # slope calc is f'd, may need slope path accumulator stored in projectile as property
-                projectile.increment_x(-x_path)
-                projectile.increment_y(-y_path)
+                #print(x_path, y_path) # slope calc is f'd, may need slope path accumulator stored in projectile as property
+                projectile.increment_x(x_path)
+                projectile.increment_y(y_path)
                 d2.draw_bitmap_array_raw(projectile.ba, int(projectile.x), int(projectile.y), projectile.w, projectile.h)
 
             # seems to need big hitbox.. which is fine honestly
                 for en in e:
-                    if en and util.check_for_collision(en.x, en.y, en.size, en.size, projectile.x, projectile.y, projectile.w, projectile.h, hit_box_mult=5):
+                    if en and util.check_for_collision(en.x, en.y, en.size, en.size, projectile.x, projectile.y, projectile.w, projectile.h, hit_box_mult=80):
                         en.change_value('hp', -tower.damage)
-                        projectile.increment_x(200)  
-
+                        projectile.increment_x(200)
+                        print(f"contact made at {en.x} {en.y}")
+            for enemy in enemies:
+                d2.draw_bitmap_array_raw(enemy.ba, enemy.x, enemy.y, enemy.size, enemy.size)
         d2.present()
-        sleep(1)
+        sleep(.08)
         d2.clear_buffers()
     return
 
@@ -401,15 +402,16 @@ test_code.test_movement()
 _, eba, objects = load_sprites()
 enemy_sprite = bytearray(eba['sprite'])
 tower_sprite = bytearray(objects['tower_defense_1'])
-t1 = Tower(1, 40, 10050, 1, [], 1000, tower_sprite)
-t2 = Tower(38, 30, 10050, 1, [], 1500, tower_sprite)
-t3 = Tower(108, 36, 1500, 1, [], 1850, tower_sprite) # tower shoot time not applying
-my_towers = [t1, t2, t3]
+t1 = Tower(1, 40, 15050, 1, [], 1000, tower_sprite)
+t2 = Tower(38, 30, 1250, 1, [], 1030, tower_sprite)
+t3 = Tower(108, 36, 5000, 1, [], 850, tower_sprite) # tower shoot time not applying
+my_towers = [t1]
 
 #_, lvl, x, y, ba, size, ide
 enemy_targets = [
-    Enemy(1, 22, 12, enemy_sprite, 14, random.randint(-9999, 9999)),
-    Enemy(2, 90, 12, enemy_sprite, 14, random.randint(-9999, 9999))
+    Enemy(1, 0, 0, enemy_sprite, 14, random.randint(-9999, 9999)),
+    Enemy(1, 100, 47, enemy_sprite, 14, random.randint(-9999, 9999)),
+    Enemy(1, 110, 20, enemy_sprite, 14, random.randint(-9999, 9999))
 ]
 test_tower_sets(my_towers, enemy_targets, objects)
 
@@ -433,4 +435,5 @@ Load a list of save state data and populate UI elements - player level, inventor
 
 
 '''
+
 
