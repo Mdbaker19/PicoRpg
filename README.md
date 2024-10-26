@@ -1,2 +1,4 @@
 # thonnyIDE
-storing the files to git, will do it periodically to better save all of it in case someone wants to build an ssd1309 pi pico game
+Building out a handheld game, printed body containing 2 ssd1309 displays and some buttons
+Pi pico backend with external eeprom
+Running into a lot of memory limits on json reads so they are split up..

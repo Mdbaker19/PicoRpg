@@ -4,9 +4,11 @@ class Util():
     def __init__(self):
         pass
     
+    def distance(p1, p2):
+        return (p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2
+    def is_point_in_range(tower, target, prange):
+        return distance(tower, target) <= prange
 
-    # returns binary array to then be rendered
-    # or collision detection
     
     # maybe need to address this hitbox since i am getting centerX and Y, maybe /2 here or before calling?
     # assign enemy objects or such a needToCheckCollision property so this is not done unecessarily 
@@ -18,6 +20,8 @@ class Util():
         return False
     
     def _collision_check(self, obj1_x, obj1_y, obj1_w, obj1_h, obj2_x, obj2_y, obj2_w, obj2_h):
+        #ob1_x, ob1_y = self._get_center_x(obj1_x, obj1_y, obj1_w, obj1_h)
+        #ob2_x, ob2_y = self._get_center_x(obj2_x, obj2_y, obj2_w, obj2_h)
         is1X = obj1_x < obj2_x + obj2_w
         if not is1X: return False
         is2X = obj1_x + obj1_w > obj2_w
@@ -34,14 +38,16 @@ class Util():
         dy = cy1 - cy2
         return math.sqrt(dx * dx + dy * dy)
         
-    def get_slope_path(self, one, two):
-        try:
-            slope = (two.y - one.y) / (two.x - one.x)
-            if isinstance(slope, int):
-                return slope, 1
-            return math.modf(slope)
-        except ZeroDivisionError:
-            return (two.y - one.y), 0
+    def get_direction_vector(self, t, e):
+        #tx, ty = self._get_center_x(t.x, t.y, 14, 19)
+        #ex, ey = self._get_center_x(e.y, e.y, e.size, e.size)
+        dx = e.x - t.x
+        dy = e.y - t.y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+        if distance != 0:
+            dx /= distance
+            dy /= distance
+        return dx, dy
         
         '''
     def zip_longest(l1, l2, dfv=None):
@@ -51,6 +57,9 @@ class Util():
             v2 = l2[i] if i < len(l2)
             yield v1, v2
     '''
+    
+    def is_on_screen(self, p):
+        return p.x <= 128 and p.x >= 0 and p.y >= 0 and p.y <= p.y <= 64
     
     def _get_center_x(self, obj_x, obj_y, obj_w, obj_h):
         cx = obj_x + obj_w / 2
