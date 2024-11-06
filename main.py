@@ -24,7 +24,6 @@ db2 = Pin(7, Pin.IN, Pin.PULL_UP)
 db3 = Pin(8, Pin.IN, Pin.PULL_UP) # make this new menu cycle button (down)
 db4 = Pin(9, Pin.IN, Pin.PULL_UP)
 
-
 quit_b = Pin(15, Pin.IN, Pin.PULL_UP)
 
 i2c_memory = I2C(0, scl=Pin(1), sda=Pin(0), freq=50000)
